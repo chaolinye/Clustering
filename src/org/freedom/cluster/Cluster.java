@@ -6,14 +6,22 @@ import java.util.*;
 
 /**
  * Created by chaolin on 2017/4/20.
+ * 簇
  */
 public class Cluster {
+    // 左子簇
     private Cluster left;
+    // 右子簇
     private Cluster right;
+    // 属于该簇的Aia项目集合
     private List<AiaProject> aiaProjects=new ArrayList<>();
+    // 左右子簇之间的距离
     private double distance;
+    // 代表簇的标题集
     private Map<String,Integer> titles;
+    // 代表簇的标签集
     private Map<String,Double> labels;
+
     public Cluster(Cluster left, Cluster right) {
         super();
         this.left = left;
@@ -21,6 +29,7 @@ public class Cluster {
         aiaProjects.addAll(left.getAiaProjects());
         aiaProjects.addAll(right.getAiaProjects());
     }
+
     public Cluster(AiaProject aia) {
         super();
         left=null;
@@ -28,6 +37,7 @@ public class Cluster {
         aiaProjects.add(aia);
     }
 
+    // 生成簇的标签集
     public void generateLabel(){
 
         Map<String,Double> clusterVector=new HashMap<>();
@@ -43,6 +53,8 @@ public class Cluster {
         }
         labels=sortMapByValue(clusterVector);
     }
+
+    // 生成簇的标题集
     public void generateTitle(){
         Map<String,Integer> map=new HashMap<String,Integer>();
         for(int i=0;i<aiaProjects.size();i++){
@@ -51,6 +63,7 @@ public class Cluster {
         titles=sortMapByValue(map);
     }
 
+    // 把两个map相加
     private void addMap(Map<String,Integer> map,Map<String,Integer> other){
         for(Map.Entry<String, Integer> entry:other.entrySet()){
             if(map.containsKey(entry.getKey())){
@@ -61,6 +74,7 @@ public class Cluster {
         }
     }
 
+    // 根据map中的value对map进行排序
     private <K,V extends Comparable<V>> Map<K,V> sortMapByValue(Map<K,V> map){
         List<Map.Entry<K,V>> list=new ArrayList<>(map.entrySet());
         Collections.sort(list,new Comparator<Map.Entry<K, V>>() {
@@ -78,6 +92,7 @@ public class Cluster {
         return sortMap;
     }
 
+    // 得到最为重要的前几个标签
     public String[] getFirstLabel(int num){
         if(num<=0) return null;
         if(num>getLabels().entrySet().size()){
@@ -94,7 +109,7 @@ public class Cluster {
         }
         return strs;
     }
-
+    // 得到最为重要的前几个标题
     public String[] getFirstTitle(int num){
         if(num<=0) return null;
         if(num>getTitles().entrySet().size()){
@@ -112,6 +127,7 @@ public class Cluster {
         return strs;
     }
 
+    // 对簇中序遍历，得到Aia的合并顺序
     public static List<AiaProject> inOrder(Cluster c){
         List<AiaProject> list=new ArrayList<>();
         if(c.getAiaProjects().size()==1){
@@ -122,7 +138,6 @@ public class Cluster {
         }
         return list;
     }
-
 
     public Cluster getLeft() {
         return left;
@@ -161,6 +176,7 @@ public class Cluster {
     public void setLabels(Map<String, Double> labels) {
         this.labels = labels;
     }
+
     public String toString(){
         StringBuilder sb=new StringBuilder();
         if(left==null&&right==null){

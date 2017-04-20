@@ -4,6 +4,7 @@ import java.util.*;
 
 /**
  * Created by chaolin on 2017/4/20.
+ * Aia距离求解
  */
 public class CalculateDistance {
     // 距离求解的项目集合
@@ -37,6 +38,7 @@ public class CalculateDistance {
 
         // calculate IDF
         for (String mutation : mutationCountProject.keySet()) {
+            // 最后+1，避免项目数量较少时出现即使先相同项目的距离也为100
             double idf = Math.log10(totalProjects * 1.0 / mutationCountProject.get(mutation)+1);
             mutationIDF.put(mutation, idf);
         }
@@ -60,6 +62,7 @@ public class CalculateDistance {
         }
     }
 
+    // 通过余弦定理求解两个Aia项目之间的距离
     public double calculateDistance(AiaProject aiaProjectA, AiaProject aiaProjectB) {
         // consine theorem solving similarity
         if (aiaProjectA == null || aiaProjectB == null || !aiaProjectA.isValid() || !aiaProjectB.isValid()) {
@@ -100,7 +103,7 @@ public class CalculateDistance {
         }
         return result;
     }
-
+    // 得到全部Aia的距离矩阵
     public double[][] calculateAllDistance() {
         double[][] disMatrix = new double[aiaProjects.size()][aiaProjects.size()];
         for (int i = 0; i < aiaProjects.size(); i++) {
@@ -115,6 +118,7 @@ public class CalculateDistance {
         return disMatrix;
     }
 
+    //  得到全部Aia的Map形式的距离矩阵
     public Map<AiaProject, Map<AiaProject, Double>> calculateAllDistanceToMap() {
         Map<AiaProject, Map<AiaProject, Double>> disMap = new HashMap<>();
         for (int i = 0; i < aiaProjects.size(); i++) {
@@ -131,23 +135,11 @@ public class CalculateDistance {
         return aiaProjects;
     }
 
-    public void setAiaProjects(List<AiaProject> aiaProjects) {
-        this.aiaProjects = aiaProjects;
-    }
-
     public Map<String, Integer> getMutationCountProject() {
         return mutationCountProject;
     }
 
-    public void setMutationCountProject(Map<String, Integer> mutationCountProject) {
-        this.mutationCountProject = mutationCountProject;
-    }
-
     public Map<String, Double> getMutationIDF() {
         return mutationIDF;
-    }
-
-    public void setMutationIDF(Map<String, Double> mutationIDF) {
-        this.mutationIDF = mutationIDF;
     }
 }

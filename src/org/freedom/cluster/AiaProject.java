@@ -13,9 +13,10 @@ import java.util.zip.ZipInputStream;
 
 /**
  * Created by chaolin on 2017/4/20.
+ * Aia项目类
  */
 public class AiaProject {
-    // 名称
+    // 文件名
     private String name;
     // 标题
     private String title;

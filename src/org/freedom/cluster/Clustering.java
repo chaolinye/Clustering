@@ -7,6 +7,7 @@ import java.util.*;
 
 /**
  * Created by chaolin on 2017/4/20.
+ * 聚类算法基类
  */
 public abstract class Clustering {
     protected CalculateDistance calculator;

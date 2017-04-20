@@ -3,6 +3,9 @@ package org.freedom.cluster;
 import java.io.InputStream;
 import java.util.List;
 
+/**
+ * 最远距离层次聚类
+ */
 public class FarestClustering extends HierarchicalClustering{
 	public FarestClustering(List<AiaProject> aiaProjects) {
 		super(aiaProjects);

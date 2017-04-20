@@ -4,6 +4,7 @@ import java.util.List;
 
 /**
  * Created by chaolin on 2017/4/20.
+ * 最近距离层次聚类
  */
 public class NestestClustering extends HierarchicalClustering{
 

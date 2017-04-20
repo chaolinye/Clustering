@@ -2,6 +2,9 @@ package org.freedom.cluster;
 
 import java.util.List;
 
+/**
+ * 平均距离层次聚类
+ */
 public class AverageClustering extends HierarchicalClustering{
 
 	public AverageClustering(List<AiaProject> aiaProjects) {

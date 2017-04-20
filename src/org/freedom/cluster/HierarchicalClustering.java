@@ -6,6 +6,7 @@ import java.util.List;
 
 /**
  * Created by chaolin on 2017/4/20.
+ * 层次聚类
  */
 public abstract class HierarchicalClustering extends Clustering{
 
