@@ -46,7 +46,7 @@ public abstract class HierarchicalClustering extends Clustering{
         }
         for(int i=0;i<originalClusters.size();i++){
             Map<Cluster,Double> map = new HashMap<>();
-            for(int j=i+1;j<originalClusters.size();i++){
+            for(int j=i+1;j<originalClusters.size();j++){
                 double dis=calculateClusterDistance(originalClusters.get(i),originalClusters.get(j));
                 map.put(originalClusters.get(j),dis);
             }

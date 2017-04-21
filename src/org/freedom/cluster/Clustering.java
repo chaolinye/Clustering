@@ -55,7 +55,7 @@ public abstract class Clustering {
             aiaProjects = new ArrayList<>();
             System.out.println("start parse");
             long start= System.currentTimeMillis();
-            for (int i = 0; i < 500; i++) {
+            for (int i = 0; i < files.size(); i++) {
                 AiaProject aia=new AiaProject(files.get(i));
                 aia.setTitle(prop.getProperty(aia.getName()));
                 aiaProjects.add(aia);
