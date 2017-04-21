@@ -1,10 +1,7 @@
 package org.freedom.cluster;
 
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Created by chaolin on 2017/4/20.
@@ -13,6 +10,27 @@ import java.util.Map;
 public abstract class HierarchicalClustering extends Clustering{
 
     private Map<Cluster,Map<Cluster,Double>> clusterDisMap=new HashMap<>();
+
+    private LinkedList<Cluster> stack = new LinkedList<>();
+
+//    class Stack<T>{
+//        private LinkedList<T> list;
+//        public Stack(){
+//            list=new LinkedList<>();
+//        }
+//        public void push(T e){
+//            list.addFirst(e);
+//        }
+//        public T pop(){
+//            return list.poll();
+//        }
+//        public T top(){
+//            return list.peek();
+//        }
+//        public T get(int i){
+//            return list.get(i);
+//        }
+//    }
 
     public HierarchicalClustering(String path,String titleFile) {
         super(path,titleFile);
@@ -121,27 +139,60 @@ public abstract class HierarchicalClustering extends Clustering{
         System.out.println("start cluster");
         long startTime = System.currentTimeMillis();
         List<Cluster> clusters = initialCluster(aiaProjects);
-        while (clusters.size() > 1) {
+        Random random=new Random();
+        List<Cluster> resultClusters=new ArrayList<>();
+
+        while (clusters.size() + stack.size() > 1) {
+            if(stack.size()==0){
+                int index=random.nextInt(clusters.size());
+                stack.push(clusters.get(index));
+                clusters.remove(index);
+            }
+            Cluster top=stack.peek();
             double min = Double.MAX_VALUE;
-            int mergeIndexA = 0;
-            int mergeIndexB = 0;
-            for (int i = 0; i < clusters.size() - 1; i++) {
-                for (int j = i + 1; j < clusters.size(); j++) {
-                    double tempDis = getClusterDistance(clusters.get(i), clusters.get(j));
-                    if (tempDis < min) {
-                        min = tempDis;
-                        mergeIndexA = i;
-                        mergeIndexB = j;
-                    }
+            int minIndex = -1;
+            for (int i = 0; i < clusters.size(); i++) {
+                double temp=getClusterDistance(top,clusters.get(i));
+                if (temp < min) {
+                    min = temp;
+                    minIndex = i;
                 }
             }
-            if (min > threshold)
-                break;
-            Cluster newCluster=mergeCluster(clusters, mergeIndexA, mergeIndexB);
-            newCluster.setDistance(min);
+            double dis=Double.MAX_VALUE;
+            if(stack.size()>1){
+                 dis=getClusterDistance(top,stack.get(1));
+            }
+            if (min < dis ){
+                stack.push(clusters.get(minIndex));
+                clusters.remove(minIndex);
+            }else {
+                stack.poll();
+                Cluster next=stack.poll();
+                if(dis>threshold){
+                    resultClusters.add(top);
+                    resultClusters.add(next);
+                }else{
+                    Cluster newCluster=new Cluster(next,top);
+                    newCluster.setDistance(dis);
+                    Map<Cluster,Double> map=new HashMap<>();
+                    for(int i=0;i<clusters.size();i++){
+                        map.put(clusters.get(i),calculateClusterDistance(newCluster,clusters.get(i)));
+                    }
+                    Iterator<Cluster> it=stack.iterator();
+                    while(it.hasNext()){
+                        Cluster c=it.next();
+                        map.put(c,calculateClusterDistance(newCluster,c));
+                    }
+                    clusterDisMap.put(newCluster,map);
+                    stack.push(newCluster);
+                }
+            }
+        }
+        if(stack.size()>0){
+            resultClusters.addAll(stack);
         }
         System.out.println("end cluster after " + (System.currentTimeMillis() - startTime) + " ms");
-        return clusters;
+        return resultClusters;
     }
 
     public List<Cluster> agglomerateClustering(List<Cluster> clusters,double threshold){
@@ -181,6 +232,7 @@ public abstract class HierarchicalClustering extends Clustering{
         System.out.println("end cluster after " + (System.currentTimeMillis() - startTime) + " ms");
         return newClusters;
     }
+
     public static List<Cluster> divide(Cluster cluster,double threshold){
         List<Cluster> clusters=new ArrayList<>();
         if(cluster.getLeft()==null){
