@@ -88,6 +88,7 @@ public abstract class HierarchicalClustering extends Clustering{
         }
         if(dis==null){
             dis=calculateClusterDistance(a,b);
+            clusterDisMap.get(a).put(b,dis);
         }
         return dis;
     }
@@ -173,6 +174,7 @@ public abstract class HierarchicalClustering extends Clustering{
                     resultClusters.add(next);
                 }else{
                     Cluster newCluster=new Cluster(next,top);
+
                     newCluster.setDistance(dis);
                     Map<Cluster,Double> map=new HashMap<>();
                     for(int i=0;i<clusters.size();i++){
@@ -182,8 +184,11 @@ public abstract class HierarchicalClustering extends Clustering{
                         map.put(stack.peek(),calculateClusterDistance(newCluster,stack.peek()));
                     }
                     clusterDisMap.put(newCluster,map);
+                    clusterDisMap.remove(top);
+                    clusterDisMap.remove(next);
                     stack.push(newCluster);
                 }
+
             }
         }
         if(stack.size()>0){
