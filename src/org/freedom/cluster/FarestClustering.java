@@ -25,7 +25,7 @@ public class FarestClustering extends HierarchicalClustering{
 	 * 求解两个簇之间的距离,选择最远的两个项目之间的距离
 	 */
 	@Override
-	protected double getClusterDistance(Cluster a, Cluster b) {
+	protected double calculateClusterDistance(Cluster a, Cluster b) {
 		// TODO Auto-generated method stub
 		double max = Double.MIN_VALUE;
 		List<AiaProject> aiaProjectsA = a.getAiaProjects();

@@ -21,7 +21,7 @@ public class AverageClustering extends HierarchicalClustering{
 	 * 求解两个簇之间的距离,选择所有项目之间的平均距离
 	 */
 	@Override
-	protected double getClusterDistance(Cluster a, Cluster b) {
+	protected double calculateClusterDistance(Cluster a, Cluster b) {
 		// TODO Auto-generated method stub
 		List<AiaProject> aiaProjectsA = a.getAiaProjects();
 		List<AiaProject> aiaProjectsB = b.getAiaProjects();

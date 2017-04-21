@@ -2,13 +2,17 @@ package org.freedom.cluster;
 
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by chaolin on 2017/4/20.
  * 层次聚类
  */
 public abstract class HierarchicalClustering extends Clustering{
+
+    private Map<Cluster,Map<Cluster,Double>> clusterDisMap=new HashMap<>();
 
     public HierarchicalClustering(String path,String titleFile) {
         super(path,titleFile);
@@ -40,16 +44,37 @@ public abstract class HierarchicalClustering extends Clustering{
                 originalClusters.add(cluster);
             }
         }
+        for(int i=0;i<originalClusters.size();i++){
+            Map<Cluster,Double> map = new HashMap<>();
+            for(int j=i+1;j<originalClusters.size();i++){
+                double dis=calculateClusterDistance(originalClusters.get(i),originalClusters.get(j));
+                map.put(originalClusters.get(j),dis);
+            }
+            clusterDisMap.put(originalClusters.get(i),map);
+        }
         return originalClusters;
     }
     /**
-     * 求解两个簇之间的距离
+     * 计算两个簇之间的距离
      *
      * @param a
      * @param b
      * @return
      */
-    protected abstract double getClusterDistance(Cluster a, Cluster b);
+    protected abstract double calculateClusterDistance(Cluster a, Cluster b);
+
+    private double getClusterDistance(Cluster a,Cluster b){
+        Double dis=clusterDisMap.get(a).get(b);
+        if(dis==null){
+            dis=clusterDisMap.get(b).get(a);
+        }
+        if(dis==null){
+            dis=calculateClusterDistance(a,b);
+        }
+        return dis;
+    }
+
+
 
     /**
      * 合并簇
@@ -66,9 +91,21 @@ public abstract class HierarchicalClustering extends Clustering{
                 mergeIndexB = tmp;
             }
             Cluster newCluster = new Cluster(clusters.get(mergeIndexA), clusters.get(mergeIndexB));
+            // add
+            clusterDisMap.remove(clusters.get(mergeIndexA));
+            clusterDisMap.remove(clusters.get(mergeIndexB));
             clusters.remove(mergeIndexB);
             clusters.remove(mergeIndexA);
             clusters.add(mergeIndexA, newCluster);
+            // add
+            for(int i=0;i<mergeIndexA;i++){
+                clusterDisMap.get(clusters.get(i)).put(newCluster,calculateClusterDistance(clusters.get(i),newCluster));
+            }
+            Map<Cluster,Double> map=new HashMap<>();
+            for(int i=mergeIndexA+1;i<clusters.size();i++){
+                map.put(clusters.get(i),calculateClusterDistance(newCluster,clusters.get(i)));
+            }
+            clusterDisMap.put(newCluster,map);
             return newCluster;
         }
         return null;

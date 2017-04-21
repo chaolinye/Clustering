@@ -25,7 +25,7 @@ public class NestestClustering extends HierarchicalClustering{
      * @param b
      * @return
      */
-    protected double getClusterDistance(Cluster a, Cluster b) {
+    protected double calculateClusterDistance(Cluster a, Cluster b) {
         double min = Double.MAX_VALUE;
         List<AiaProject> aiaProjectsA = a.getAiaProjects();
         List<AiaProject> aiaProjectsB = b.getAiaProjects();
