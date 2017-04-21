@@ -178,10 +178,8 @@ public abstract class HierarchicalClustering extends Clustering{
                     for(int i=0;i<clusters.size();i++){
                         map.put(clusters.get(i),calculateClusterDistance(newCluster,clusters.get(i)));
                     }
-                    Iterator<Cluster> it=stack.iterator();
-                    while(it.hasNext()){
-                        Cluster c=it.next();
-                        map.put(c,calculateClusterDistance(newCluster,c));
+                    if(stack.size()>0){
+                        map.put(stack.peek(),calculateClusterDistance(newCluster,stack.peek()));
                     }
                     clusterDisMap.put(newCluster,map);
                     stack.push(newCluster);
