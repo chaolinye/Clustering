@@ -70,6 +70,7 @@ public abstract class HierarchicalClustering extends Clustering{
         }
         if(dis==null){
             dis=calculateClusterDistance(a,b);
+            clusterDisMap.get(a).put(b,dis);
         }
         return dis;
     }
@@ -144,6 +145,33 @@ public abstract class HierarchicalClustering extends Clustering{
         return clusters;
     }
 
+    @Override
+    public List<Cluster> startAnalysisByClusterNumber(int num) {
+        // TODO Auto-generated method stub
+        System.out.println("start cluster by cluster number");
+        long startTime = System.currentTimeMillis();
+        List<Cluster> clusters = initialCluster(aiaProjects);
+        while (clusters.size() > num) {
+            double min = Double.MAX_VALUE;
+            int mergeIndexA = 0;
+            int mergeIndexB = 0;
+            for (int i = 0; i < clusters.size() - 1; i++) {
+                for (int j = i + 1; j < clusters.size(); j++) {
+                    double tempDis = getClusterDistance(clusters.get(i), clusters.get(j));
+                    if (tempDis < min) {
+                        min = tempDis;
+                        mergeIndexA = i;
+                        mergeIndexB = j;
+                    }
+                }
+            }
+            Cluster newCluster=mergeCluster(clusters, mergeIndexA, mergeIndexB);
+            newCluster.setDistance(min);
+        }
+        System.out.println("end cluster after " + (System.currentTimeMillis() - startTime) + " ms");
+        return clusters;
+    }
+
     public List<Cluster> agglomerateClustering(List<Cluster> clusters,double threshold){
         System.out.println("start cluster");
         long startTime = System.currentTimeMillis();
@@ -191,33 +219,6 @@ public abstract class HierarchicalClustering extends Clustering{
             clusters.addAll(divide(cluster.getLeft(),threshold));
             clusters.addAll(divide(cluster.getRight(),threshold));
         }
-        return clusters;
-    }
-
-    @Override
-    public List<Cluster> startAnalysisByClusterNumber(int num) {
-        // TODO Auto-generated method stub
-        System.out.println("start cluster by cluster number");
-        long startTime = System.currentTimeMillis();
-        List<Cluster> clusters = initialCluster(aiaProjects);
-        while (clusters.size() > num) {
-            double min = Double.MAX_VALUE;
-            int mergeIndexA = 0;
-            int mergeIndexB = 0;
-            for (int i = 0; i < clusters.size() - 1; i++) {
-                for (int j = i + 1; j < clusters.size(); j++) {
-                    double tempDis = getClusterDistance(clusters.get(i), clusters.get(j));
-                    if (tempDis < min) {
-                        min = tempDis;
-                        mergeIndexA = i;
-                        mergeIndexB = j;
-                    }
-                }
-            }
-            Cluster newCluster=mergeCluster(clusters, mergeIndexA, mergeIndexB);
-            newCluster.setDistance(min);
-        }
-        System.out.println("end cluster after " + (System.currentTimeMillis() - startTime) + " ms");
         return clusters;
     }
 }
