@@ -248,6 +248,36 @@ public abstract class HierarchicalClustering extends Clustering{
         }
         return clusters;
     }
+    public static List<Cluster> divideByNumber(Cluster cluster,int num){
+        List<Cluster> result=new ArrayList<>();
+        if(cluster.getAiaProjects().size()==1){
+            result.add(cluster);
+            System.out.println("FSDFwejfj;w");
+            return result;
+        }
+        PriorityQueue<Cluster> queue = new PriorityQueue<>(new Comparator<Cluster>() {
+            @Override
+            public int compare(Cluster o1, Cluster o2) {
+                return o2.getDistance()>o1.getDistance()?1:-1;
+            }
+        });
+        queue.offer(cluster);
+        while(result.size()+queue.size()<num&&queue.size()!=0){
+            Cluster c=queue.poll();
+            if(c.getLeft().getAiaProjects().size()==1){
+                result.add(c.getLeft());
+            }else{
+                queue.offer(c.getLeft());
+            }
+            if(c.getRight().getAiaProjects().size()==1){
+                result.add(c.getRight());
+            }else{
+                queue.offer(c.getRight());
+            }
+        }
+        result.addAll(queue);
+        return result;
+    }
 
     @Override
     public List<Cluster> startAnalysisByClusterNumber(int num) {
@@ -255,24 +285,52 @@ public abstract class HierarchicalClustering extends Clustering{
         System.out.println("start cluster by cluster number");
         long startTime = System.currentTimeMillis();
         List<Cluster> clusters = initialCluster(aiaProjects);
-        while (clusters.size() > num) {
+        Random random=new Random();
+
+        while (clusters.size() + stack.size() > 1) {
+            if(stack.size()==0){
+                int index=random.nextInt(clusters.size());
+                stack.push(clusters.get(index));
+                clusters.remove(index);
+            }
+            Cluster top=stack.peek();
             double min = Double.MAX_VALUE;
-            int mergeIndexA = 0;
-            int mergeIndexB = 0;
-            for (int i = 0; i < clusters.size() - 1; i++) {
-                for (int j = i + 1; j < clusters.size(); j++) {
-                    double tempDis = getClusterDistance(clusters.get(i), clusters.get(j));
-                    if (tempDis < min) {
-                        min = tempDis;
-                        mergeIndexA = i;
-                        mergeIndexB = j;
-                    }
+            int minIndex = -1;
+            for (int i = 0; i < clusters.size(); i++) {
+                double temp=getClusterDistance(top,clusters.get(i));
+                if (temp < min) {
+                    min = temp;
+                    minIndex = i;
                 }
             }
-            Cluster newCluster=mergeCluster(clusters, mergeIndexA, mergeIndexB);
-            newCluster.setDistance(min);
+            double dis=Double.MAX_VALUE;
+            if(stack.size()>1){
+                dis=getClusterDistance(top,stack.get(1));
+            }
+            if (min < dis ){
+                stack.push(clusters.get(minIndex));
+                clusters.remove(minIndex);
+            }else {
+                stack.poll();
+                Cluster next=stack.poll();
+                Cluster newCluster=new Cluster(next,top);
+                newCluster.setDistance(dis);
+                Map<Cluster,Double> map=new HashMap<>();
+                for(int i=0;i<clusters.size();i++){
+                    map.put(clusters.get(i),calculateClusterDistance(newCluster,clusters.get(i)));
+                }
+                if(stack.size()>0){
+                    map.put(stack.peek(),calculateClusterDistance(newCluster,stack.peek()));
+                }
+                clusterDisMap.put(newCluster,map);
+                clusterDisMap.remove(top);
+                clusterDisMap.remove(next);
+                stack.push(newCluster);
+            }
         }
+        List<Cluster> resultClusters=divideByNumber(stack.peek(),num);
+
         System.out.println("end cluster after " + (System.currentTimeMillis() - startTime) + " ms");
-        return clusters;
+        return resultClusters;
     }
 }
