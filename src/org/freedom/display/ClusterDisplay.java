@@ -208,7 +208,6 @@ public class ClusterDisplay extends JFrame {
 			if (fileTf.getText().isEmpty())
 				return;
 			startBtn.setEnabled(false);
-//			badBox.removeAll();
 			messageBox.removeAll();
 			filterBox.removeAll();
 			clusterBox.removeAll();
@@ -222,7 +221,7 @@ public class ClusterDisplay extends JFrame {
 			double threshold=0.0;
 			if(thresholdrb.isSelected()){
 				threshold=thresholdSlider.getValue();
-				clusters = clusterAnalysis.startAnalysis(threshold);
+				clusters = clusterAnalysis.startAnalysisByThreshold(threshold);
 				
 			}else{
 				clusters =clusterAnalysis.startAnalysisByClusterNumber(Integer.parseInt(numtf.getText()));
@@ -241,38 +240,12 @@ public class ClusterDisplay extends JFrame {
 			messageBox.add(Box.createVerticalStrut(10));
 			if (badAia.size() > 0) {
 				messageBox.add(new JLabel("无效的Aia文件:"));
-//				badBox.add(new JLabel("不规范的Aia文件:"));
-//				badBox.add(Box.createVerticalStrut(10));
 				messageBox.add(Box.createVerticalStrut(10));
 				JPanel errorPanel = new JPanel(new GridLayout(badAia.size()/10+1, 10));
 				for (AiaProject aia : badAia) {
 					errorPanel.add(new JLabel(" " + aia.getName() + " "));
 				}
 			}
-//			for (int i = 0; i < clusters.size(); i++) {
-//				clusterBox.add(new JLabel("类 "+i+" (共包含有"+clusters.get(i).getAiaProjects().size()+"个Aia)"));
-//				clusterBox.add(Box.createVerticalStrut(10));
-//				JPanel clusterPanel = new JPanel(new GridLayout(clusters.get(i).getAiaProjects().size()/10+1, 10));
-//				for (AiaProject aia : clusters.get(i).getAiaProjects()) {
-//					clusterPanel.add(new JLabel(" " + aia.getName() + " "));
-//					clusterPanel.setBackground(Color.YELLOW);
-//				}
-//				if (clusters.get(i).getAiaProjects().size() > 1) {
-//					JButton btn = new JButton("查看聚类");
-//					btn.addActionListener(new DisplayTree(clusters.get(i)));
-//					clusterPanel.add(btn);
-//				}
-//				clusterBox.add(clusterPanel);
-//				clusterBox.add(Box.createVerticalStrut(20));
-//			}
-//			if(threshold-0.0<0.001){
-//				for(Cluster cluster:clusters){
-//					if(cluster.getDistance()>threshold){
-//						threshold=cluster.getDistance();
-//					}
-//				}
-//			}
-//			clusterBox.add(new ClusterPanel(clusters, threshold));
 			clusterBox.add(new ClusterTree(clusters));
 			isNew=false;
 			startBtn.setText("开始聚类");
@@ -280,35 +253,6 @@ public class ClusterDisplay extends JFrame {
 			resultBox.revalidate();
 		}
 	}
-	
-//	/**
-//	 * 监听器,展示聚类后簇的树形结构
-//	 * @author FREEDOM
-//	 *
-//	 */
-//	class DisplayTree implements ActionListener{
-//		private Cluster cluster;
-//		public DisplayTree(Cluster cluster) {
-//			super();
-//			this.cluster = cluster;
-//		}
-//		@Override
-//		public void actionPerformed(ActionEvent e) {
-//			final JFrame frame = new JFrame("聚类树形展示");
-//			TreePanel tp = new TreePanel(TreePanel.CHILD_ALIGN_RELATIVE);
-//			tp.setTree(cluster);
-//			frame.add(new JScrollPane(tp,JScrollPane.VERTICAL_SCROLLBAR_ALWAYS,JScrollPane.HORIZONTAL_SCROLLBAR_ALWAYS),BorderLayout.CENTER);
-//			frame.setSize(800, 600);
-//			frame.setVisible(true);
-//			frame.addWindowListener(new WindowAdapter() {
-//				@Override
-//				public void windowClosing(WindowEvent e) {
-//					frame.dispose();
-//				}
-//			});
-//		}
-//		
-//	}
 	/**
 	 * 程序入口
 	 * @param args

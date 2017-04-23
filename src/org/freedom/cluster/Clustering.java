@@ -10,9 +10,11 @@ import java.util.*;
  * 聚类算法基类
  */
 public abstract class Clustering {
-    protected CalculateDistance calculator;
+    // 聚类的项目集
     protected List<AiaProject> aiaProjects;
+    // 项目集无效的项目
     protected List<AiaProject> badAia = new ArrayList<>();
+    // 项目集的距离矩阵
     protected Map<AiaProject, Map<AiaProject, Double>> disMap;
     /**
      *
@@ -23,13 +25,6 @@ public abstract class Clustering {
         super();
         this.aiaProjects = aiaProjects;
         createDisMap();
-    }
-
-    public Clustering(CalculateDistance calculator) {
-        super();
-        this.aiaProjects = calculator.getAiaProjects();
-        this.calculator = calculator;
-        disMap = calculator.calculateAllDistanceToMap();
     }
 
     /**
@@ -55,7 +50,7 @@ public abstract class Clustering {
             aiaProjects = new ArrayList<>();
             System.out.println("start parse");
             long start= System.currentTimeMillis();
-            for (int i = 0; i < files.size(); i++) {
+            for (int i = 0; i < 500; i++) {
                 AiaProject aia=new AiaProject(files.get(i));
                 aia.setTitle(prop.getProperty(aia.getName()));
                 aiaProjects.add(aia);
@@ -88,7 +83,7 @@ public abstract class Clustering {
     private void createDisMap() {
         System.out.println("start create distance map");
         long start = System.currentTimeMillis();
-        calculator = new CalculateDistance(aiaProjects);
+        CalculateDistance calculator = new CalculateDistance(aiaProjects);
         disMap = calculator.calculateAllDistanceToMap();
         System.out.println("end create distance map after " + (System.currentTimeMillis() - start) + " ms");
     }
@@ -107,22 +102,13 @@ public abstract class Clustering {
         }
         return dis;
     }
-
-    /**
-     * 初始化簇
-     *
-     * @param
-     * @return
-     */
-    protected abstract List<Cluster> initialCluster(List<AiaProject> aiaProjects);
-
     /**
      * 指定距离阈值的聚类算法
      *
      * @param threshold
      * @return
      */
-    public abstract List<Cluster> startAnalysis(double threshold);
+    public abstract List<Cluster> startAnalysisByThreshold(double threshold);
 
     /**
      * 指定簇个数的聚类算法
@@ -134,5 +120,9 @@ public abstract class Clustering {
 
     public List<AiaProject> getBadAia() {
         return badAia;
+    }
+
+    public Map<AiaProject, Map<AiaProject, Double>> getDisMap(){
+        return getDisMap();
     }
 }
