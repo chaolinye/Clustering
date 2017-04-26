@@ -27,6 +27,10 @@ public abstract class HierarchicalClustering extends Clustering{
         // TODO Auto-generated constructor stub
     }
 
+    public HierarchicalClustering(List<AiaProject>aiaProjects,double[][] dis){
+        super(aiaProjects,dis);
+    }
+
     /**
      * 指定距离阈值的层次聚类
      * @param threshold

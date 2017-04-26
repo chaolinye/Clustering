@@ -96,6 +96,28 @@ public class CalculateDistance {
         return 100.0 - (cos * 100.0);
     }
 
+    /**
+     * 求解Aia项目之间的欧式距离
+     * @param aiaProjectA
+     * @param aiaProjectB
+     * @return
+     */
+    public double calculateEuclideanDistance(AiaProject aiaProjectA, AiaProject aiaProjectB){
+        if (aiaProjectA == null || aiaProjectB == null || !aiaProjectA.isValid() || !aiaProjectB.isValid()) {
+            return -1;
+        }
+        Set<String> mutations = new HashSet<>();
+        mutations.addAll(aiaProjectA.getMutationCounter().keySet());
+        mutations.addAll(aiaProjectB.getMutationCounter().keySet());
+        double sum=0.0;
+        for (String mutation : mutations) {
+            double valueA = getMapValue(aiaProjectA.getVector(), mutation, 0.0);
+            double valueB = getMapValue(aiaProjectB.getVector(), mutation, 0.0);
+            sum += Math.pow(valueA - valueB,2);
+        }
+        return Math.sqrt(sum);
+    }
+
     private <K, V> V getMapValue(Map<K, V> map, K key, V defaultValue) {
         V result = map.get(key);
         if (result == null) {
@@ -125,6 +147,7 @@ public class CalculateDistance {
             Map<AiaProject, Double> tmp = new HashMap<>();
             for (int j = i + 1; j < aiaProjects.size(); j++) {
                 tmp.put(aiaProjects.get(j), calculateDistance(aiaProjects.get(i), aiaProjects.get(j)));
+//                tmp.put(aiaProjects.get(j), calculateEuclideanDistance(aiaProjects.get(i), aiaProjects.get(j)));
             }
             disMap.put(aiaProjects.get(i), tmp);
         }

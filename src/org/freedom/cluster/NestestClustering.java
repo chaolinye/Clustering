@@ -18,6 +18,10 @@ public class NestestClustering extends HierarchicalClustering{
         // TODO Auto-generated constructor stub
     }
 
+    public NestestClustering(List<AiaProject> aiaProjects,double[][] dis){
+        super(aiaProjects,dis);
+    }
+
     /**
      * 求解两个簇之间的距离,选择最近的两个项目之间的距离
      *

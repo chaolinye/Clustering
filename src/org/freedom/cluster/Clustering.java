@@ -16,6 +16,8 @@ public abstract class Clustering {
     protected List<AiaProject> badAia = new ArrayList<>();
     // 项目集的距离矩阵
     protected Map<AiaProject, Map<AiaProject, Double>> disMap;
+
+    private CalculateDistance calculator;
     /**
      *
      * @param aiaProjects
@@ -25,6 +27,19 @@ public abstract class Clustering {
         super();
         this.aiaProjects = aiaProjects;
         createDisMap();
+    }
+
+    public Clustering(List<AiaProject> aiaProjects,double[][] disMetrix){
+        super();
+        this.aiaProjects = aiaProjects;
+        disMap=new HashMap<>();
+        for(int i=0;i<aiaProjects.size();i++){
+            Map<AiaProject,Double> dis=new HashMap<>();
+            for(int j=i+1;j<aiaProjects.size();j++){
+                dis.put(aiaProjects.get(j),disMetrix[i][j]);
+            }
+            disMap.put(aiaProjects.get(i),dis);
+        }
     }
 
     /**
@@ -50,7 +65,7 @@ public abstract class Clustering {
             aiaProjects = new ArrayList<>();
             System.out.println("start parse");
             long start= System.currentTimeMillis();
-            for (int i = 0; i < 500; i++) {
+            for (int i = 0; i < files.size(); i++) {
                 AiaProject aia=new AiaProject(files.get(i));
                 aia.setTitle(prop.getProperty(aia.getName()));
                 aiaProjects.add(aia);
@@ -83,7 +98,7 @@ public abstract class Clustering {
     private void createDisMap() {
         System.out.println("start create distance map");
         long start = System.currentTimeMillis();
-        CalculateDistance calculator = new CalculateDistance(aiaProjects);
+        calculator = new CalculateDistance(aiaProjects);
         disMap = calculator.calculateAllDistanceToMap();
         System.out.println("end create distance map after " + (System.currentTimeMillis() - start) + " ms");
     }
@@ -95,7 +110,7 @@ public abstract class Clustering {
      * @param aiaB
      * @return
      */
-    protected double getAiaDistance(AiaProject aiaA, AiaProject aiaB) {
+    public double getAiaDistance(AiaProject aiaA, AiaProject aiaB) {
         Double dis = disMap.get(aiaA).get(aiaB);
         if (dis == null) {
             dis = disMap.get(aiaB).get(aiaA);
@@ -124,5 +139,9 @@ public abstract class Clustering {
 
     public Map<AiaProject, Map<AiaProject, Double>> getDisMap(){
         return getDisMap();
+    }
+
+    public CalculateDistance getCalculator(){
+        return calculator;
     }
 }

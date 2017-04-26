@@ -9,7 +9,7 @@ import org.freedom.cluster.Clustering;
 import org.freedom.cluster.NestestClustering;
 
 public class ClusterAnalysisTest {
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception{
 		Clustering ca=new NestestClustering("D:\\test\\standard","D:\\test\\aiaTitle.properties");
 		List<Cluster> result=ca.startAnalysisByThreshold(20);
 		System.out.println("bad aia: "+ca.getBadAia());

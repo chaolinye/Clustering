@@ -11,8 +11,12 @@ import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.PrintStream;
 import java.text.ParseException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.Box;
 import javax.swing.ButtonGroup;
@@ -30,10 +34,9 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileFilter;
 
-import org.freedom.cluster.AiaProject;
-import org.freedom.cluster.Cluster;
-import org.freedom.cluster.Clustering;
-import org.freedom.cluster.NestestClustering;
+import mdsj.MDSJ;
+import org.freedom.cluster.*;
+import org.jfree.ui.RefineryUtilities;
 
 public class ClusterDisplay extends JFrame {
 
@@ -53,6 +56,10 @@ public class ClusterDisplay extends JFrame {
 	private Box resultBox;
 
 	private Clustering clusterAnalysis;
+
+	private Clustering clustering2D;
+
+	private int clusterNum;
 
 	public ClusterDisplay(String title) throws HeadlessException {
 		super(title);
@@ -214,7 +221,8 @@ public class ClusterDisplay extends JFrame {
 			long start=System.currentTimeMillis();
 			if (isNew) {
 				System.out.println("aia解析中...");
-				clusterAnalysis = new NestestClustering(fileTf.getText(),"D:\\test\\aiaTitle.properties");
+				clusterAnalysis = new AverageClustering(fileTf.getText(),"D:\\test\\aiaTitle.properties");
+				clustering2D=null;
 			}
 			System.out.println("aia聚类中...");
 			List<Cluster> clusters;
@@ -234,9 +242,16 @@ public class ClusterDisplay extends JFrame {
 			}
 			System.out.println("聚类完成,更新控件...");
 			long time=System.currentTimeMillis()-start;
+			messageBox.add(new JLabel("Aia项目数: "+clusterAnalysis.getCalculator().getAiaProjects().size()+" 个Aia"));
+			messageBox.add(Box.createVerticalStrut(10));
 			messageBox.add(new JLabel("聚类耗时: "+time+" ms"));
 			messageBox.add(Box.createVerticalStrut(10));
-			messageBox.add(new JLabel("簇的数目: "+clusters.size()));
+			clusterNum=clusters.size();
+			messageBox.add(new JLabel("簇的数目: "+clusterNum));
+			messageBox.add(Box.createVerticalStrut(10));
+			JButton virualBtn= new JButton("查看聚类分布");
+			virualBtn.addActionListener(new VirualListener(clusterAnalysis));
+			messageBox.add(virualBtn);
 			messageBox.add(Box.createVerticalStrut(10));
 			if (badAia.size() > 0) {
 				messageBox.add(new JLabel("无效的Aia文件:"));
@@ -251,6 +266,86 @@ public class ClusterDisplay extends JFrame {
 			startBtn.setText("开始聚类");
 			startBtn.setEnabled(true);
 			resultBox.revalidate();
+			System.out.println("控件更新完成");
+		}
+	}
+	class VirualListener implements ActionListener{
+		private double[][][] data;
+		private Clustering ca;
+		private ScatterFrame scatterFrame;
+		public VirualListener(Clustering ca){
+			this.ca=ca;
+		}
+		@Override
+		public void actionPerformed(ActionEvent e) {
+			if(scatterFrame!=null){
+				scatterFrame.setVisible(true);
+				return;
+			}
+			List<AiaProject> aias=new ArrayList<>();
+			aias.addAll(ca.getCalculator().getAiaProjects());
+			aias.removeAll(ca.getBadAia());
+			int num=aias.size();
+
+			double[][] dis=new double[num][num];
+			for(int i=0;i<num;i++){
+				for(int j=0;j<num;j++){
+					if(i==j){
+						dis[i][j]=0.0;
+					}else{
+						dis[i][j]=ca.getAiaDistance(aias.get(i),aias.get(j));
+					}
+				}
+			}
+//				double[][] xy= Virualization.classicalMDS(dis);
+			double[][] xy= MDSJ.classicalScaling(dis);
+			double[][] disMetrix=new double[dis.length][dis.length];
+			for(int i=0;i<dis.length;i++){
+				for(int j=0;j<dis.length;j++){
+					disMetrix[i][j]=Math.sqrt(Math.pow(xy[0][i]-xy[0][j],2)+Math.pow(xy[1][i]-xy[1][j],2));
+				}
+			}
+			double[][] t=new double[dis.length][2];
+			for(int i=0;i<dis.length;i++){
+				t[i][0]=xy[0][i];
+				t[i][1]=xy[1][i];
+			}
+			xy=t;
+			Map<AiaProject,Double[]> points=new HashMap<>();
+			for(int i=0;i<aias.size();i++){
+				Double[] point=new Double[2];
+				point[0]=xy[i][0];
+				point[1]=xy[i][1];
+				points.put(aias.get(i),point);
+			}
+			if(clustering2D==null) {
+				clustering2D= new AverageClustering(aias, disMetrix);
+			}
+			List<Cluster> r=clustering2D.startAnalysisByClusterNumber(clusterNum);
+			double[][][] data=new double[r.size()][][];
+			int k=0;
+			for(int i=0;i<r.size();i++){
+				int size=r.get(i).getAiaProjects().size();
+				double[][] temp=new double[size][];
+				for(int j=0;j<size;j++){
+					Double[] point=points.get(r.get(i).getAiaProjects().get(j));
+					temp[j]=new double[]{point[0],point[1]};
+				}
+				data[i]=temp;
+			}
+
+			scatterFrame = new ScatterFrame("Scatter Plot Demo 2",data);
+			scatterFrame.pack();
+//			RefineryUtilities.centerFrameOnScreen(scatterFrame);
+			scatterFrame.setVisible(true);
+			scatterFrame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
+			scatterFrame.addWindowListener(new WindowAdapter() {
+				@Override
+				public void windowClosing(WindowEvent e) {
+					System.out.println("关闭事件");
+					scatterFrame.setVisible(false);
+				}
+			});
 		}
 	}
 	/**

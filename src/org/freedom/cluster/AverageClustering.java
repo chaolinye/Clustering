@@ -16,6 +16,10 @@ public class AverageClustering extends HierarchicalClustering{
 		super(path, titleFile);
 		// TODO Auto-generated constructor stub
 	}
+
+	public AverageClustering(List<AiaProject> aiaProjects,double[][] dis){
+		super(aiaProjects,dis);
+	}
 	
 	/**
 	 * 求解两个簇之间的距离,选择所有项目之间的平均距离
